@@ -1,0 +1,13 @@
+pandas
+scikit-learn
+jupyter
+matplotlib
+seaborn
+dvc[gdrive]
+mlflow
+fastapi
+uvicorn
+pytest
+sdv
+evidently
+deepchecks
