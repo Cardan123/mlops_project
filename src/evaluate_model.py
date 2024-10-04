@@ -34,7 +34,7 @@ class ModelEvaluator:
 if __name__ == "__main__":
     X_test_path = os.getenv("PROCESSED_DATA_PATH") + "/X_test.csv"
     y_test_path = os.getenv("PROCESSED_DATA_PATH") + "/y_test.csv"
-    model_path = os.getenv("MODEL_URI", "models:/RandomForestClassifier/Production")
+    model_path = os.getenv("MODEL_URI", "models:/RandomForestClassifier/latest")
     
     me = ModelEvaluator(X_test_path, y_test_path, model_path)
     X_test, y_test = me.load_data()

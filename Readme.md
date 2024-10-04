@@ -79,7 +79,7 @@ Create your own `.env` files for each environment. Example `.env.dev`:
 ```bash
 # .env.dev
 MLFLOW_TRACKING_URI=http://localhost:5001
-MLFLOW_ARTIFACT_URI=http://localhost:9000/mlflow_dev
+MLFLOW_ARTIFACT_URI=http://localhost:9000/mlflowdev
 MODEL_REGISTRY_STAGE="Development"
 RAW_DATA_PATH=data/raw/Occupancy_Estimation.csv
 PROCESSED_DATA_PATH=data/processed
@@ -103,6 +103,14 @@ docker-compose --env-file .env.staging up -d
 ```bash
 docker-compose --env-file .env.prod up -d
 ```
+
+Go to localhost:9001
+
+Get MINIO Acces Key and save into config.env/MINIO_ACCESS_KEY
+
+Stop services docker-compose down
+
+Start again docker-compose --env-file .env.stage up -d --build
 
 ### **6. Using DVC to Manage the Pipeline**
 The DVC pipeline is defined in `dvc.yaml`. This file outlines the steps for data preparation, model training, and evaluation.

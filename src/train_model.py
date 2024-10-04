@@ -49,7 +49,8 @@ class ModelTrainer:
             
             mlflow.register_model(
                 model_uri=f"runs:/{run.info.run_id}/random_forest_model",
-                name="RandomForestClassifier"
+                name="RandomForestClassifier",
+                
             )
 
 if __name__ == "__main__":

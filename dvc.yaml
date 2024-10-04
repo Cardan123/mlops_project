@@ -23,5 +23,3 @@ stages:
       - src/evaluate_model.py
       - data/processed/X_test.csv
       - data/processed/y_test.csv
-    metrics:
-      - metrics.json
