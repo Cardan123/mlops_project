@@ -1,0 +1,10 @@
+pandas
+scikit-learn
+mlflow
+fastapi
+uvicorn
+psycopg2-binary
+Flask
+joblib
+Werkzeug
+python-dotenv

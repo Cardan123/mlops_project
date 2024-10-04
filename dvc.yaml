@@ -1,0 +1,27 @@
+stages:
+  prepare:
+    cmd: python src/data_preparation.py
+    deps:
+      - src/data_preparation.py
+      - data/raw/Occupancy_Estimation.csv
+    outs:
+      - data/processed/X_train.csv
+      - data/processed/X_test.csv
+      - data/processed/y_train.csv
+      - data/processed/y_test.csv
+
+  train:
+    cmd: python src/train_model.py
+    deps:
+      - src/train_model.py
+      - data/processed/X_train.csv
+      - data/processed/y_train.csv
+
+  evaluate:
+    cmd: python src/evaluate_model.py
+    deps:
+      - src/evaluate_model.py
+      - data/processed/X_test.csv
+      - data/processed/y_test.csv
+    metrics:
+      - metrics.json
