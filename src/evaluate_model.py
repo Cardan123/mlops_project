@@ -51,8 +51,8 @@ class ModelEvaluator:
 
     def log_predictions(self, y_test, y_pred):
         pred_df = pd.DataFrame({"actual": y_test.values.ravel(), "predicted": y_pred})
-        pred_df.to_csv("predictions.csv", index=False)
-        mlflow.log_artifact("predictions.csv")
+        pred_df.to_csv("data/predictions/predictions.csv", index=False)
+        mlflow.log_artifact("data/predictions/predictions.csv")
 
     def save_metrics(self, metrics, output_path):
         with open(output_path, 'w') as f:
