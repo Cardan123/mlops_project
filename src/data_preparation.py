@@ -1,16 +1,14 @@
 import pandas as pd
 from sklearn.model_selection import train_test_split
 import os
-from dotenv import load_dotenv
-
-# Load the environment variables
-stage = os.getenv('ENV', 'dev')
-load_dotenv(f".env.{stage}")
+import argparse
+import yaml
 
 class DataPreparation:
-    def __init__(self, input_path, output_dir):
+    def __init__(self, input_path, output_dir, params):
         self.input_path = input_path
         self.output_dir = output_dir
+        self.params = params
 
     def load_data(self):
         return pd.read_csv(self.input_path)
@@ -33,19 +31,28 @@ class DataPreparation:
         return X, y
 
     def split_data(self, X, y):
-        return train_test_split(X, y, test_size=0.2, random_state=42)
+        test_size = self.params['prepare_data']['test_size']
+        random_state = self.params['prepare_data']['random_state']
+        return train_test_split(X, y, test_size=test_size, random_state=random_state)
 
     def save_data(self, X_train, X_test, y_train, y_test):
+        os.makedirs(self.output_dir, exist_ok=True)
         X_train.to_csv(f'{self.output_dir}/X_train.csv', index=False)
         X_test.to_csv(f'{self.output_dir}/X_test.csv', index=False)
         y_train.to_csv(f'{self.output_dir}/y_train.csv', index=False)
         y_test.to_csv(f'{self.output_dir}/y_test.csv', index=False)
 
 if __name__ == "__main__":
-    input_path = os.getenv("RAW_DATA_PATH")
-    output_dir = os.getenv("PROCESSED_DATA_PATH")
+    parser = argparse.ArgumentParser(description="Prepare data")
+    parser.add_argument("--input_path", type=str, help="Path to raw data")
+    parser.add_argument("--output_dir", type=str, help="Directory for processed data")
+    parser.add_argument("--params", type=str, default="params.yaml", help="Path to params.yaml")
+    args = parser.parse_args()
 
-    dp = DataPreparation(input_path, output_dir)
+    with open(args.params, 'r') as fd:
+        params = yaml.safe_load(fd)
+
+    dp = DataPreparation(args.input_path, args.output_dir, params)
     df = dp.load_data()
     X, y = dp.preprocess_data(df)
     X_train, X_test, y_train, y_test = dp.split_data(X, y)

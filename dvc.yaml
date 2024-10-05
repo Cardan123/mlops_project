@@ -1,25 +1,34 @@
 stages:
-  prepare:
-    cmd: python src/data_preparation.py
+  prepare_data:
+    cmd: python src/data_preparation.py --input_path data/raw/data.csv --output_dir data/processed --params params.yaml
     deps:
+      - data/raw/data.csv
       - src/data_preparation.py
-      - data/raw/Occupancy_Estimation.csv
+      - params.yaml
     outs:
       - data/processed/X_train.csv
       - data/processed/X_test.csv
       - data/processed/y_train.csv
       - data/processed/y_test.csv
-
-  train:
-    cmd: python src/train_model.py
+    params:
+      - prepare_data
+  train_model:
+    cmd: python src/train_model.py --X_train_path data/processed/X_train.csv --y_train_path data/processed/y_train.csv --params params.yaml
     deps:
-      - src/train_model.py
       - data/processed/X_train.csv
       - data/processed/y_train.csv
-
-  evaluate:
-    cmd: python src/evaluate_model.py
+      - src/train_model.py
+      - params.yaml
+    outs:
+      - models/best_model.pkl
+    params:
+      - train_model
+  evaluate_model:
+    cmd: python src/evaluate_model.py --X_test_path data/processed/X_test.csv --y_test_path data/processed/y_test.csv --model_path models/best_model.pkl
     deps:
-      - src/evaluate_model.py
       - data/processed/X_test.csv
       - data/processed/y_test.csv
+      - models/best_model.pkl
+      - src/evaluate_model.py
+    outs:
+      - metrics/evaluation.json
