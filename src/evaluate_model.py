@@ -29,8 +29,14 @@ class ModelEvaluator:
         try:
             model = joblib.load(self.model_path)
             return model
-        except Exception as e:
+        except FileNotFoundError as e:
             print(f"Error loading model: {e}")
+            raise
+        except joblib.JoblibException as e:
+            print(f"Error in joblib: {e}")
+            raise
+        except Exception as e:
+            print(f"Unexpected error: {e}")
             raise
 
     def evaluate_model(self, model, X_test, y_test):
