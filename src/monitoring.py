@@ -11,10 +11,13 @@ from dotenv import load_dotenv
 # Cargar variables de entorno (si es necesario)
 stage = os.getenv('ENV', 'dev')
 load_dotenv(f".env.{stage}")
+buffer = None
+buffer_lock = None
 
 # Clase para la detección de data drift
 class DataDriftMonitor:
     def __init__(self, X_train_path, buffer_size=100, drift_threshold=0.1):
+        global buffer, buffer_lock
         self.X_train = pd.read_csv(X_train_path)
         self.buffer = deque(maxlen=buffer_size)  # Buffer circular para los datos en vivo
         self.buffer_lock = threading.Lock()  # Bloqueo para asegurar la sincronización en el acceso al buffer
