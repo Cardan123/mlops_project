@@ -3,12 +3,12 @@ import pandas as pd
 import mlflow
 import mlflow.pyfunc
 from mlflow.exceptions import MlflowException
-from collections import deque
 import threading
-from monitoring import background_monitoring_task, buffer, buffer_lock
+from monitoring import buffer, buffer_lock, MonitoringTask
 
 app = Flask(__name__)
 
+# Load the latest model from MLflow
 def load_latest_model():
     model_name = "BestModel"
     try:
@@ -40,7 +40,12 @@ def predict():
         return jsonify({"error": str(e)}), 400
 
 if __name__ == "__main__":
-    monitoring_thread = threading.Thread(target=background_monitoring_task, daemon=True)
+    X_train_path = "data/processed/X_train.csv"
+    monitoring_task = MonitoringTask(X_train_path)
+    
+    # Start the monitoring task in a background thread
+    monitoring_thread = threading.Thread(target=monitoring_task.background_task, daemon=True)
     monitoring_thread.start()
 
+    # Start the Flask app
     app.run(host="0.0.0.0", port=5000)
