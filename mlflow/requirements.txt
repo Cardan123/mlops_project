@@ -11,3 +11,10 @@ pytest
 sdv
 evidently
 deepchecks
+psycopg2-binary
+dvc
+Flask
+boto3
+joblib
+python-dotenv
+

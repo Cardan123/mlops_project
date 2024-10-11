@@ -1,0 +1,18 @@
+prepare_data:
+  test_size: 0.2
+  random_state: 42
+
+train_model:
+  models:
+    LinearRegression:
+      fit_intercept: [True, False]
+      n_jobs: [1, -1]
+    Ridge:
+      alpha: [0.1, 1.0, 10.0]
+    Lasso:
+      alpha: [0.1, 1.0, 10.0]
+    DecisionTreeRegressor:
+      max_depth: [5, 10]
+      min_samples_split: [2, 5]
+    KNeighborsRegressor:
+      n_neighbors: [3, 5, 7]
