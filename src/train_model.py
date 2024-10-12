@@ -83,7 +83,7 @@ class ModelTrainer:
 
     def log_model_and_metrics(self, model, X_train, y_train, model_name, best_params, mean_mse):
         mlflow.set_experiment(self.experiment_name)
-        with mlflow.start_run():
+        with mlflow.start_run(run_name=model_name):
             run = mlflow.active_run()
             run_id = run.info.run_id  
 
@@ -150,3 +150,4 @@ if __name__ == "__main__":
 
     mt = ModelTrainer(args.X_train_path, args.y_train_path, args.params, experiment_name="Training")
     mt.run()
+    
