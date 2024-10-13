@@ -78,7 +78,7 @@ Create your own `.env` files for each environment. Example `.env.dev`:
 
 ```bash
 # .env.dev
-MLFLOW_TRACKING_URI=http://localhost:5001
+MLFLOW_TRACKING_URI=http://tracking_server:5001
 MLFLOW_ARTIFACT_URI=http://localhost:9000/mlflowdev
 MODEL_REGISTRY_STAGE="Development"
 RAW_DATA_PATH=data/raw/Occupancy_Estimation.csv
