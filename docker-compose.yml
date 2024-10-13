@@ -15,6 +15,22 @@ services:
       - frontend
       - backend
 
+  streamlit:
+    build:
+      context: ./src/dashboard 
+      dockerfile: Dockerfile
+    container_name: streamlit_dashboard
+    ports:
+      - "8501:8501"
+    environment:
+      - MLFLOW_TRACKING_URI=${MLFLOW_TRACKING_URI}
+      - API_BASE_URL=http://flask_app:5000
+    volumes:
+      - ./src/dashboard:/app 
+    networks:
+      - frontend
+      - backend
+
   db:
     restart: always
     image: postgres

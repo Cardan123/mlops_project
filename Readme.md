@@ -1,62 +1,78 @@
-# **MLOps Project - End-to-End Machine Learning Pipeline with DVC and Remote Storage**
+# **MLOps Project: End-to-End Machine Learning Pipeline with DVC and Remote Storage**
 
 ## **Overview**
 
-This project demonstrates a complete **MLOps pipeline** using **DVC** (Data Version Control) for tracking data and model artifacts, and **MLflow** for managing experiments and model lifecycle. It includes stages from data preparation, model training, and evaluation to model deployment, with environment-specific configurations for **development**, **staging**, and **production** environments. A Flask API is also provided to serve predictions, with everything containerized using Docker.
+This project is a full **MLOps pipeline** that uses **DVC** for tracking data and models, and **MLflow** for managing experiments and model lifecycle. It covers everything from data preparation, model training, and evaluation to deployment. It's built with environment-specific configurations for **development**, **staging**, and **production** environments. The project also includes a Flask API for serving model predictions and uses **Streamlit** to visualize experiment results and monitor the model.
 
 ## **Project Structure**
 
 ```bash
 mlops_project/
 ├── .dvc/                   
-├── data/                   
+├── data/                    
 │   ├── raw/                
 │   └── processed/          
 ├── models/                 
 ├── src/
-│   ├── app/                
+│   ├── dashboard/           
+│   │   ├── app.py          
+│   │   ├── Dockerfile      
+│   │   └── requirements.txt
+│   ├── app/                 
+│   │   ├── app.py          
+│   │   ├── Dockerfile      
+│   │   └── requirements.txt 
 │   └── scripts/            
-├── tests/                  
-├── notebooks/              
+├── tests/                 
+├── notebooks/             
 ├── .env.dev                
 ├── .env.staging            
-├── .env.prod               
+├── .env.prod            
 ├── dvc.yaml                
-├── docker-compose.yml      
-└── requirements.txt        
+├── docker-compose.yml       
+└── requirements.txt         
 ```
 
 ## **Components**
 
-### **1. Data Version Control (DVC)**
-DVC is used to manage data and model artifacts. The pipeline stages are defined in `dvc.yaml`, allowing easy reproduction of the entire pipeline and pushing the artifacts to remote storage.
+### **1. Flask API**
 
-### **2. Data Preparation**
-The `data_preparation.py` script loads, preprocesses, and splits the data. It outputs the train/test datasets, which are tracked by DVC in the `data/processed/` directory.
+A RESTful Flask API (`src/app/app.py`) serves the production-ready model for predictions. It interacts with the **MLflow Model Registry** to load and serve models. Core features include:
 
-### **3. Model Training**
-The `train_model.py` script trains a machine learning model using RandomForestRegressor, logs the model to **MLflow**, and registers it in the **MLflow Model Registry**. This is part of the DVC pipeline.
+- **Prediction Endpoint**: Takes input data and returns predictions.
+- **Model Reloading**: Automatically reloads the latest production model.
+- **Monitoring**: Displays status of the monitoring service.
 
-### **4. Model Evaluation**
-The `evaluate_model.py` script evaluates the model on test data, logs evaluation metrics (e.g., MSE, R² score) to MLflow, and is tracked by DVC.
+### **2. Streamlit Dashboard**
 
-### **5. Flask API**
-A Flask-based REST API (`app.py`) serves the model for predictions. The API loads the latest production model from the **MLflow Model Registry** and returns predictions as JSON.
+The **Streamlit app** (`src/dashboard/app.py`) lets you visualize experiment results and metrics from **MLflow**, monitor drift metrics, and track model performance. It connects to the Flask API for live data. Key features include:
 
-### **6. Docker**
-The project is containerized using **Docker Compose** to orchestrate the following services:
-- **Flask App**: A REST API for predictions.
-- **PostgreSQL**: Database to store MLflow tracking information.
-- **MinIO**: Object storage to store model artifacts.
-- **MLflow Server**: To track experiments and manage the model registry.
+- Comparing metrics between models.
+- Visualizing experiment runs and model performance.
+- Tracking data drift over time.
+
+### **3. Data Version Control (DVC)**
+
+**DVC** tracks the dataset and model artifacts. The pipeline defined in `dvc.yaml` ensures reproducibility and can push artifacts to a **remote storage** like S3 or Google Drive.
+
+### **4. Docker Compose**
+
+The project is fully containerized using Docker Compose to orchestrate:
+
+- **Flask API**: Serves predictions from the latest model.
+- **Streamlit Dashboard**: For MLflow experiment visualization.
+- **MLflow Server**: Tracks experiments and manages the model registry.
+- **PostgreSQL**: Stores MLflow tracking data.
+- **MinIO**: Object storage for model artifacts.
 
 ## **Setup and Running**
 
 ### **1. Prerequisites**
-- Docker & Docker Compose installed.
-- Python 3.8+ and `pip` installed.
-- DVC installed (`pip install dvc`).
-- **DVC remote** storage (e.g., S3, GDrive) is already set up.
+
+- Docker & Docker Compose
+- Python 3.8+ and `pip`
+- DVC (`pip install dvc`)
+- **Remote storage** set up for DVC (e.g., S3 or GDrive)
 
 ### **2. Clone the Repository**
 
@@ -65,19 +81,19 @@ git clone https://github.com/ArmandoDLaRosa/mlops_project.git
 cd mlops_project
 ```
 
-### **3. Set Up Python Virtual Environment**
+### **3. Virtual Environment Setup**
 
 ```bash
 python3 -m venv venv
-source venv/bin/activate 
+source venv/bin/activate
 pip install -r requirements.txt
 ```
 
 ### **4. Configure Environment Variables**
-Create your own `.env` files for each environment. Example `.env.dev`:
+
+You'll need `.env` files for each environment. Example for **development** (`.env.dev`):
 
 ```bash
-# .env.dev
 MLFLOW_TRACKING_URI=http://tracking_server:5001
 MLFLOW_ARTIFACT_URI=http://localhost:9000/mlflowdev
 MODEL_REGISTRY_STAGE="Development"
@@ -87,102 +103,90 @@ PROCESSED_DATA_PATH=data/processed
 
 Repeat for `.env.staging` and `.env.prod`.
 
-### **5. Running the Project with Docker Compose**
+### **5. Run the Project with Docker Compose**
 
-#### **Development:**
+#### **Development**:
+
 ```bash
 docker-compose --env-file .env.dev up -d
 ```
 
-#### **Staging:**
+#### **Staging**:
+
 ```bash
 docker-compose --env-file .env.staging up -d
 ```
 
-#### **Production:**
+#### **Production**:
+
 ```bash
 docker-compose --env-file .env.prod up -d
 ```
 
-Go to localhost:9001
+Streamlit will be available at `http://localhost:8501` and the Flask API at `http://localhost:5000`.
 
-Get MINIO Acces Key and save into config.env/MINIO_ACCESS_KEY
+### **6. Test the API**
 
-Stop services docker-compose down
+You can send a **POST** request to the `/predict` endpoint to test the API:
 
-Start again docker-compose --env-file .env.stage up -d --build
+```bash
+curl -X POST -H "Content-Type: application/json" -d '{
+    "S1_Temp": 25.3, "S2_Temp": 26.1, "S3_Temp": 24.8, "S4_Temp": 25.0,
+    "S1_Light": 100, "S2_Light": 120, "S3_Light": 110, "S4_Light": 90,
+    "S1_Sound": 0.5, "S2_Sound": 0.7, "S3_Sound": 0.3, "S4_Sound": 0.4,
+    "S5_CO2": 380, "S5_CO2_Slope": 0.03, "S6_PIR": 1, "S7_PIR": 1
+}' http://localhost:5000/predict
+```
 
-### **6. Using DVC to Manage the Pipeline**
-The DVC pipeline is defined in `dvc.yaml`. This file outlines the steps for data preparation, model training, and evaluation.
+You'll receive a JSON response with the model’s predictions:
 
-#### To run the full DVC pipeline:
+```json
+{
+    "input_data": {...},
+    "predictions": [23.5]
+}
+```
+
+### **7. DVC Pipeline Management**
+
+The DVC pipeline is defined in `dvc.yaml`, which outlines the data preparation, model training, and evaluation steps.
+
+To run the full DVC pipeline:
 
 ```bash
 dvc repro
 ```
 
 This will execute the following stages:
-1. **Data Preparation**: Loads, preprocesses, and splits the data.
-2. **Model Training**: Trains the model and registers it with MLflow.
-3. **Model Evaluation**: Evaluates the model and logs metrics.
 
-#### Pushing Artifacts to Remote Storage:
+1. **Data Preparation**: Load, preprocess, and split the data.
+2. **Model Training**: Train the model and log it with MLflow.
+3. **Model Evaluation**: Evaluate the model and track metrics.
 
-Once the pipeline has completed successfully, push all data and artifacts to the remote storage using:
+To push the artifacts to the remote storage:
 
 ```bash
 dvc push
 ```
 
-This ensures that the raw data, processed data, trained models, and any other tracked files are stored in the configured DVC remote (Gdrive).
+This stores data, models, and other artifacts in your remote DVC storage.
 
-### **7. Training the Model**
-The model training process can be run manually or as part of the DVC pipeline. If you just want to retrain the model:
+### **8. Shutting Down Services**
 
-```bash
-dvc repro train
-```
-
-This will:
-- Use the processed training data.
-- Train the model and log it to MLflow.
-- Register the trained model in the MLflow Model Registry.
-
-### **8. Testing the API**
-Once the model is trained and the Flask API is running, you can test it by sending a **POST** request to the `/predict` endpoint.
-
-Example using `curl`:
-
-```bash
-curl -X POST -H "Content-Type: application/json" -d '[
-    {"feature1": 2.3, "feature2": 3.5, "feature3": 4.7}
-]' http://localhost:5000/predict
-```
-
-The response will include the model’s predictions:
-
-```json
-{
-    "predictions": [23.5, 42.1, ...]
-}
-```
-
-### **9. Managing DVC and MLflow**
-- **DVC** is used to track dataset versions, models, and pipelines. You can push/pull your data and models to the remote storage easily.
-  
-  ```bash
-  dvc add data/raw/Occupancy_Estimation.csv
-  git add data/raw/Occupancy_Estimation.csv.dvc
-  git commit -m "Added raw data to DVC"
-  ```
-
-  After a pipeline run, use `dvc push` to push changes to remote storage.
-
-- **MLflow** is used to track experiments, models, and metrics. You can view your experiment results and model registry by accessing the MLflow UI at `http://localhost:5001`.
-
-### **10. Shutting Down Services**
-To stop the running services:
+To stop all services:
 
 ```bash
 docker-compose down
 ```
+
+### **9. Data Drift Monitoring**
+
+The **Streamlit Dashboard** allows you to track data drift over time. You can manually trigger drift analysis through the API:
+
+```bash
+curl -X POST http://localhost:5000/trigger_drift_analysis
+```
+
+### **10. MLflow Experiment Visualization**
+
+The dashboard also provides an interface for comparing **MLflow experiment runs**, metrics, and models, helping you monitor your production model’s performance.
