@@ -8,6 +8,7 @@ import random
 from dotenv import load_dotenv
 from monitoring import MonitoringTask
 from datetime import datetime
+from collections import deque
 
 app = Flask(__name__)
 
@@ -19,6 +20,8 @@ mlflow.set_tracking_uri(mlflow_tracking_uri)
 
 model_lock = threading.Lock()
 model = None
+residuals_std_dev = None
+recent_predictions = deque(maxlen=10) 
 
 monitoring_task = None
 monitoring_lock = threading.Lock()
@@ -34,16 +37,22 @@ def load_latest_production_model():
         latest_version = max(versions, key=lambda v: int(v.version))
         model_uri = f"models:/{model_name}/{latest_version.version}"
         loaded_model = mlflow.pyfunc.load_model(model_uri)
-        return loaded_model
+
+        run_id = latest_version.run_id
+        residuals_std_dev = client.get_metric_history(run_id, "residuals_std_dev")[0].value
+
+        return loaded_model, residuals_std_dev
     except mlflow.exceptions.MlflowException:
-        return None
+        return None, None
     except Exception:
-        return None
+        return None, None
+
 
 def initialize_model():
     global model
+    global residuals_std_dev 
     with model_lock:
-        model = load_latest_production_model()
+        model, residuals_std_dev = load_latest_production_model()
 
 def generate_random_data():
     return {
@@ -115,12 +124,37 @@ def predict():
         with model_lock:
             predictions = model.predict(df)
 
+        z = 1.96
+        lower_bound = predictions - z * residuals_std_dev
+        upper_bound = predictions + z * residuals_std_dev
+
+        recent_predictions.append({
+            "input_data": data,
+            "predictions": predictions.tolist(),
+            "confidence_interval": {
+                "lower": lower_bound.tolist(),
+                "upper": upper_bound.tolist()
+            },
+            "timestamp": datetime.now().isoformat()
+        })
+
         monitoring_task.data_monitor.add_live_data(df)
 
-        return jsonify({"input_data": data, "predictions": predictions.tolist()})
+        return jsonify({
+            "input_data": data,
+            "predictions": predictions.tolist(),
+            "confidence_interval": {
+                "lower": lower_bound.tolist(),
+                "upper": upper_bound.tolist()
+            }
+        })
 
     except Exception as e:
         return jsonify({"error": str(e)}), 400
+
+@app.route('/recent_predictions', methods=['GET'])
+def recent_predictions_endpoint():
+    return jsonify(list(recent_predictions))
 
 @app.route('/reload_model', methods=['POST'])
 def reload_model():

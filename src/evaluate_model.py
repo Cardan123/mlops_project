@@ -7,8 +7,8 @@ import json
 import joblib
 from dotenv import load_dotenv
 
-stage = os.getenv('ENV', 'dev')
-load_dotenv(f".env.{stage}")
+MLFLOW_TRACKING_URI = os.getenv('MLFLOW_TRACKING_URI', 'http://localhost:5001')
+mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
 class ModelEvaluator:
     def __init__(self, X_test_path, y_test_path, model_path, experiment_name="Testing"):
         self.X_test_path = X_test_path

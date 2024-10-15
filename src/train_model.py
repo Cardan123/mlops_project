@@ -13,8 +13,9 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.tree import DecisionTreeRegressor
 
-stage = os.getenv('ENV', 'dev')
-load_dotenv(f".env.{stage}")
+
+MLFLOW_TRACKING_URI = os.getenv('MLFLOW_TRACKING_URI', 'http://localhost:5001')
+mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
 
 class ModelTrainer:
     def __init__(self, X_train_path, y_train_path, params_path, experiment_name="Training"):
@@ -96,10 +97,16 @@ class ModelTrainer:
             train_mse = mean_squared_error(y_train, y_pred_train)
             train_r2 = r2_score(y_train, y_pred_train)
 
+            residuals = y_train.values.ravel() - y_pred_train
+            residuals_std_dev = residuals.std()
+
             mlflow.log_metric("train_mse", train_mse)
             mlflow.log_metric("train_r2", train_r2)
             mlflow.log_metric("cv_mean_mse", mean_mse)
 
+            mlflow.log_dict({'residuals': residuals.tolist()}, "residuals.json")
+            mlflow.log_metric("residuals_std_dev", residuals_std_dev)
+            
             mlflow.sklearn.log_model(
                 sk_model=model,
                 artifact_path="model",
