@@ -27,7 +27,7 @@ Esta política se aplica a todos los modelos desarrollados, entrenados, y desple
 2. **Monitoreo de Desempeño**
 
     - **Evaluaciones Periódicas**: Configurar MLFlow para realizar una evaluación periódica del desempeño de los modelos, incluyendo métricas como precisión, recall y F1-score. Esto se documenta automáticamente en cada ejecución y se almacena en un archivo de reporte.
-    - **Alertas de Desviación**: Implementar alertas automáticas para que el equipo reciba notificaciones si el rendimiento del modelo baja en más de un 10% en relación con la línea base inicial.
+    - **Alertas de Desviación**: Implementar alertas automáticas para que el equipo reciba notificaciones si el rendimiento del modelo baja en más de un 10% en relación con la línea base inicial. _Pendiente de implementación_
 
 3. **Pruebas de Reproducibilidad**
 
@@ -54,7 +54,7 @@ Esta política abarca todo el código fuente del proyecto y es obligatoria para 
     - **Herramientas de Formato**: Usar black o pylint en Python y linters específicos en otros lenguajes para asegurar que el código cumple con el estándar de estilo definido.
 
 2. **Integración Continua (CI) con GitHub Actions**
-    - **Pruebas Automatizadas**: Implementar un flujo CI/CD en GitHub Actions que ejecute pruebas automatizadas en cada push al repositorio. Esto asegura que el código nuevo no rompa funcionalidades existentes.
+    - **Pruebas Automatizadas**: Implementar un flujo CI/CD en GitHub Actions que ejecute pruebas automatizadas en cada push al repositorio. Esto asegura que el código nuevo no rompa funcionalidades existentes.  _Pendiente de implementación_
     - **Revisión de Código**: Todo cambio debe pasar por revisión de al menos un miembro del equipo. Las revisiones se deben centrar en mejorar la legibilidad y eficiencia del código, así como identificar errores potenciales.
 
 3. **Documentación y Comentarios**
