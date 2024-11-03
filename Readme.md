@@ -190,3 +190,29 @@ curl -X POST http://localhost:5000/trigger_drift_analysis
 ### **10. MLflow Experiment Visualization**
 
 The dashboard also provides an interface for comparing **MLflow experiment runs**, metrics, and models, helping you monitor your production model’s performance.
+
+
+### **11. Unit Testing**
+This project includes unit tests to ensure the correctness of core functionalities like data preparation, model training, and evaluation. We use pytest as the testing framework.
+
+Test Structure
+Unit tests are organized within the tests directory, with each test module corresponding to components in src. For instance:
+
+* test_data_preparation.py: Tests for data preprocessing steps in DataPreparation class.
+
+* test_train_model.py: Tests for model training, evaluation, and registration in ModelTrainer class.
+
+* test_evaluate_model.py: Tests for model evaluation and metric logging in ModelEvaluator class.
+
+## Running Tests
+To run the tests make sure the docker project is running, then navigate to 
+
+```cmd
+mlops_project/tests
+ ```
+
+and execute
+
+```cmd
+PYTHONPATH=../src pytest -v
+```
